@@ -1,6 +1,5 @@
 import java.util.Scanner;
-import java.util.HashMap;
-import java.util.List;
+import java.util.TreeMap;
 import java.util.Map;
 import java.util.ArrayList;
 import java.io.*;
@@ -16,8 +15,8 @@ import java.io.*;
 public class Scheduler {
 
     // Class lookup
-    private Map<String, ArrayList<String>> curriculum = new HashMap<String, ArrayList<String>>();
-    int maxPerSemester;
+    TreeMap<String, ArrayList<String>> curriculum = new TreeMap<String, ArrayList<String>>();
+    int maxPerSemester; // Defines how many courses per semester the user can manage
 
     /**
      * Constructor method
@@ -58,6 +57,9 @@ public class Scheduler {
                 // Add to the class lookup class variable
                 this.curriculum.put(course, prereqs);
             }
+
+            input.close();
+
         } catch (FileNotFoundException e) {
             // Handle exception
             System.out.println("[!] ERROR: That file cannot be found...");
@@ -69,7 +71,7 @@ public class Scheduler {
      * Simple show method that will display all of the classes and their prereqs.
      * Mostly used for debugging.
      */
-    public void show() {
+    public void showCurriculum() {
 
         System.out.println("\n--------------COMPUTER SCIENCE CURRICULUM----------------\n");
 
@@ -83,6 +85,41 @@ public class Scheduler {
 
             System.out.println(ret);
             count++;
+        }
+    }
+
+    /**
+     * Method that will make the schedule for the student and then display it to the
+     * user
+     */
+    public void showSchedule() {
+
+        // Make the schedule using the loaded curriculum
+        ArrayList<ArrayList<String>> schedule = this.makeSchedule();
+        // Display it
+        this.showSchedule(schedule);
+    }
+
+    /**
+     * Method that will take a schedule that is already made and then display it to
+     * the console.
+     * 
+     * @param schedule 2D array that holds each semester of the already made
+     *                 schedule.
+     */
+    public void showSchedule(ArrayList<ArrayList<String>> schedule) {
+
+        // Cycle through each semester
+        for (int i = 0; i < schedule.size(); i++) {
+            ArrayList<String> semester = schedule.get(i);
+            System.out.print("Semester #" + String.valueOf(i + 1) + "\n"
+                    + "---------------------------------------------------\n");
+            // Cycle through each course in the semester
+            for (int j = 0; j < semester.size(); j++) {
+                String course = semester.get(j);
+                System.out.println("  > Class #" + String.valueOf(j + 1) + ": " + course);
+            }
+            System.out.println();
         }
 
     }
@@ -129,14 +166,18 @@ public class Scheduler {
         for (Map.Entry<String, ArrayList<String>> course : this.curriculum.entrySet()) {
 
             // Check that course has not been taken and prereqs are satisfied
-            if (!taken.contains(course.getKey()) && isSatisfied(taken, course.getValue()))) { 
-                
+            if (!taken.contains(course.getKey())) {
+                if (isSatisfied(taken, course.getValue())) {
+                    options.add(course.getKey()); // This course can be taken by the student
+                }
 
             }
-
         }
 
+        // System.out.println("OPTIONS:");
+        // System.out.println(options);
         return options;
+
     }
 
     /**
@@ -183,6 +224,8 @@ public class Scheduler {
 
             schedule.add(current_semester); // Add this semester to the schedule
             taken.addAll(current_semester); // Add this semesters courses to the taken list
+            // System.out.println("TAKEN:");
+            // System.out.println(taken);
 
             options = getOptions(taken); // Get new options for the next semester
         }
@@ -203,9 +246,11 @@ public class Scheduler {
         int maxPerSemester = 5; // Maximum number of classes to take during a semester
         // Create the Scheduler object
         Scheduler scheduler = new Scheduler(filename, maxPerSemester);
-        // Make the students schedule
-        scheduler.show();
-        // Print the schedule to the console
+        // Show the curriculum as it is loaded
+        // scheduler.showCurriculum();
+        // Make the schedule
+        ArrayList<ArrayList<String>> schedule = scheduler.makeSchedule();
+        scheduler.showSchedule(schedule); // Display the schedule
 
     }
 
