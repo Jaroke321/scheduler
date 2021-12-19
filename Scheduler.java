@@ -8,7 +8,7 @@ import java.io.*;
  * @author Jacob Keller
  * @author Patrick Ryan
  * @author Collin Murphy
- * @author Brad
+ * @author Brad Measel
  * 
  * @since 12/1/2021
  */
